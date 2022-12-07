@@ -136,16 +136,16 @@ and what each classification means
             st.image("team/martha.jpeg", width=200)
         with tab2:
             st.header("Nnaemeka Onyebueke")
-            st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+            st.image("team/nnaemeka.jpeg", width=200)
         with tab3:
             st.header("Thepe Mashala")
             st.image("team/8324.jpg", width=200)
         with tab4:
             st.header("Hafsa Shariff Abass")
-            st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+            st.image("team/hafsa.jpeg", width=200)
         with tab5:
             st.header("Orisemeke Ibude")
-            st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+            st.image("team/orise.jpeg", width=200)
         with tab6:
             st.header("Karabo Eugene Hlahla")
             st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
