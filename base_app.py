@@ -47,29 +47,30 @@ def main():
     # Creates a main title and subheader on your page -
     # these are static across all pages
     st.title("Team GridSearch AI Tweet Classifer")
-    st.subheader("Climate change tweet classification")
+    st.subheader("A Study of People's Sentiment on Climate Change")
 
     # Creating sidebar with selection box -
     # you can create multiple pages this way
-    options = ["Prediction", "Information", "Project Description", "About Us"]
+    options = ["About Us", "Team", "Project Description",
+               "Information", "Prediction"]
     selection = st.sidebar.selectbox("Choose Option", options)
 
     # Building out the "Information" page
     if selection == "Information":
-        st.info("General Information")
+        st.info(
+            "Below is the raw twitter data and the class descriptions of each label")
         # You can read a markdown file from supporting resources folder
-        st.markdown(""" ***Class Description***
-
+        st.markdown(""" 
 Below is a description of the possible responses/classifcations from running the model
 and what each classification means
 
-2 News: the tweet links to factual news about climate change
+[2] News: the tweet links to factual news about climate change
 
-1 Pro: the tweet supports the belief of man-made climate change
+[1] Pro: the tweet supports the belief of man-made climate change
 
-0 Neutral: the tweet neither supports nor refutes the belief of man-made climate change
+[0] Neutral: the tweet neither supports nor refutes the belief of man-made climate change
 
--1 Anti: the tweet does not believe in man-made climate change Variable definitions
+[-1] Anti: the tweet does not believe in man-made climate change Variable definitions
 
 """)
 
@@ -94,11 +95,13 @@ and what each classification means
             predictor = joblib.load(
                 open(os.path.join("resources/Logistic_regression.pkl"), "rb"))
             prediction = predictor.predict(vect_text)
-
+            message_dictionary = {
+                '[-1]': 'anti', '[0]': 'a neutral message on', '[1]': 'pro', '[2]': 'news about'}
             # When model has successfully run, will print prediction
             # You can use a dictionary or similar structure to make this output
             # more human interpretable.
-            st.success("Text Categorized as: {}".format(prediction))
+            st.success("The text entered above has been classified as " +
+                       message_dictionary["{}".format(prediction)] + " climate change.")
 
         # Building out the "Project Description" page
     if selection == "Project Description":
@@ -124,34 +127,48 @@ and what each classification means
 
         # Building out the predication page
     if selection == "About Us":
-        st.info("Team Profile")
-        st.markdown("""The tabs below contain detailed information about 
-		each team member who was involved in the project""")
+        st.info(
+            "Below is detailed information about the our business and the GridSearch AI team")
+        st.markdown("""
+        GridSearch AI supports businesses to derive meaningful insight from data
+        """)
+        st.markdown("- GridSearch AI is a team of experienced professionals")
+        st.markdown("- The team has over 6 years track record")
+        st.markdown("- The business has served over 3000 customers globally")
+        st.markdown("- The business leverage robust technology")
 
-        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-            ["Martha", "Nnaemeka", "Thepe", "Harfsa", "Orise", "Karabo", "Koketso"])
+        st.markdown('''
+        <style>
+        [data-testid="stMarkdownContainer"] ul{
+            list-style-position: inside;
+        }
+        </style>
+        ''', unsafe_allow_html=True)
+
+    if selection == "Team":
+        st.info(
+            "Below is information about the GridSearch AI team")
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+            ["Martha", "Nnaemeka", "Thepe", "Harfsa", "Orise", "Karabo"])
 
         with tab1:
-            st.header("Martha Mwaura")
+            st.subheader("Martha Mwaura")
             st.image("team/martha.jpeg", width=200)
         with tab2:
-            st.header("Nnaemeka Onyebueke")
+            st.subheader("Nnaemeka Onyebueke")
             st.image("team/nnaemeka.jpeg", width=200)
         with tab3:
-            st.header("Thepe Mashala")
+            st.subheader("Thepe Mashala")
             st.image("team/8324.jpg", width=200)
         with tab4:
-            st.header("Hafsa Shariff Abass")
+            st.subheader("Hafsa Shariff Abass")
             st.image("team/hafsa.jpeg", width=200)
         with tab5:
-            st.header("Orisemeke Ibude")
+            st.subheader("Orisemeke Ibude")
             st.image("team/orise.jpeg", width=200)
         with tab6:
-            st.header("Karabo Eugene Hlahla")
-            st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
-        with tab7:
-            st.header("Koketso Maleka")
-            st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+            st.subheader("Karabo Eugene Hlahla")
+            st.image("team/karabo.jpeg", width=200)
 
 
 # Required to let Streamlit instantiate our web app.
