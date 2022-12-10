@@ -31,15 +31,31 @@ from PIL import Image
 import pandas as pd
 
 # Vectorizer
-news_vectorizer = open("resources/tfidfvect.pkl", "rb")
+news_vectorizer = open("resources/gridsearch_vectorizer.pkl", "rb")
 # loading your vectorizer from the pkl file
 tweet_cv = joblib.load(news_vectorizer)
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
 
-# The main function where we will build the actual app
 
+def model_prediction(model_name, vect_text):
+    # Load your .pkl file with the model of your choice + make predictions
+    # Try loading in multiple models to give the user a choice
+    predictor = joblib.load(
+        open(os.path.join("resources/"+model_name+".pkl"), "rb"))
+    prediction = predictor.predict(vect_text)
+    message_dictionary = {
+        '[-1]': 'anti', '[0]': 'a neutral message on', '[1]': 'pro', '[2]': 'news about'}
+    # When model has successfully run, will print prediction
+    # You can use a dictionary or similar structure to make this output
+    # more human interpretable.
+    model_result = "The text entered above has been classified as **" + \
+        message_dictionary["{}".format(prediction)] + "** climate change."
+    return model_result
+
+
+# The main function where we will build the actual app
 
 def main():
     """Tweet Classifier App with Streamlit """
@@ -52,7 +68,7 @@ def main():
     # Creating sidebar with selection box -
     # you can create multiple pages this way
     options = ["About Us", "Team", "Project Description",
-               "Information", "Prediction"]
+               "Information", "Model Predictions"]
     selection = st.sidebar.selectbox("Choose Option", options)
 
     # Building out the "Information" page
@@ -61,16 +77,15 @@ def main():
             "Below is the raw twitter data and the class descriptions of each label")
         # You can read a markdown file from supporting resources folder
         st.markdown(""" 
-Below is a description of the possible responses/classifcations from running the model
-and what each classification means
+Below is a description of the possible classifications and what each classification means
 
-[2] News: the tweet links to factual news about climate change
+* **[-1] - Anti: The tweet does not believe in man-made climate change Variable definitions**
 
-[1] Pro: the tweet supports the belief of man-made climate change
+* **[0] - Neutral: The tweet neither supports nor refutes the belief of man-made climate change**
 
-[0] Neutral: the tweet neither supports nor refutes the belief of man-made climate change
+* **[1] - Pro: The tweet supports the belief of man-made climate change**
 
-[-1] Anti: the tweet does not believe in man-made climate change Variable definitions
+* **[2] - News: The tweet links to factual news about climate change**
 
 """)
 
@@ -80,28 +95,39 @@ and what each classification means
             st.write(raw[['sentiment', 'message']])
 
     # Building out the Prediction page
-    if selection == "Prediction":
+    if selection == "Model Predictions":
         st.info("Prediction with ML Models")
-        st.markdown(""" The project uses a logistic regression model to classify tweets
-		into different sentiment classes.""")
+        st.markdown(
+            """ You may test the 3 models' (LinearSVC, Logistic Regression & Ridge Classifer) 
+            classification results by entering text in the text area below and clicking 
+            the tab for which you'd like to view the results.""")
+
         # Creating a text box for user input
         tweet_text = st.text_area("Enter Text", "Type Here")
 
-        if st.button("Classify"):
-            # Transforming user input with vectorizer
-            vect_text = tweet_cv.transform([tweet_text]).toarray()
-            # Load your .pkl file with the model of your choice + make predictions
-            # Try loading in multiple models to give the user a choice
-            predictor = joblib.load(
-                open(os.path.join("resources/Logistic_regression.pkl"), "rb"))
-            prediction = predictor.predict(vect_text)
-            message_dictionary = {
-                '[-1]': 'anti', '[0]': 'a neutral message on', '[1]': 'pro', '[2]': 'news about'}
-            # When model has successfully run, will print prediction
-            # You can use a dictionary or similar structure to make this output
-            # more human interpretable.
-            st.success("The text entered above has been classified as " +
-                       message_dictionary["{}".format(prediction)] + " climate change.")
+        # Transforming user input with vectorizer
+        vect_text = tweet_cv.transform([tweet_text]).toarray()
+
+        tab_logreg, tab_lsvc, tab3_ridge = st.tabs(
+            ["LinearSVC", "Logistic Regression", "Ridge Classifier"])
+
+        with tab_lsvc:
+            st.markdown(
+                """ Here a LinearSVC model is used to classify tweets into different sentiment classes.""")
+            model_name = "gridsearch_final_lsvc"
+            st.success(model_prediction(model_name, vect_text))
+        with tab_logreg:
+            st.markdown(
+                """ Here a logistic regression model is used to classify tweets into different sentiment classes.""")
+            model_name = "gridsearch_logistic_regression"
+            st.success(model_prediction(model_name, vect_text))
+        with tab3_ridge:
+            st.markdown(
+                """ Here a ridge classifier model is used to classify tweets into different sentiment classes.""")
+            model_name = "gridsearch_ridgeclfr"
+            st.success(model_prediction(model_name, vect_text))
+
+        # if st.button("Classify"):
 
         # Building out the "Project Description" page
     if selection == "Project Description":
@@ -153,21 +179,27 @@ and what each classification means
 
         with tab1:
             st.subheader("Martha Mwaura")
+            st.markdown("Project Manager")
             st.image("team/martha.jpeg", width=200)
         with tab2:
             st.subheader("Nnaemeka Onyebueke")
+            st.markdown("Technical Lead")
             st.image("team/nnaemeka.jpeg", width=200)
         with tab3:
             st.subheader("Thepe Mashala")
+            st.markdown("Application Developer/Cloud Engineer")
             st.image("team/8324.jpg", width=200)
         with tab4:
             st.subheader("Hafsa Shariff Abass")
+            st.markdown("Business Analyst")
             st.image("team/hafsa.jpeg", width=200)
         with tab5:
             st.subheader("Orisemeke Ibude")
+            st.markdown("Data Scientist")
             st.image("team/orise.jpeg", width=200)
         with tab6:
             st.subheader("Karabo Eugene Hlahla")
+            st.markdown("Data Engineer")
             st.image("team/karabo.jpeg", width=200)
 
 
