@@ -60,6 +60,15 @@ def model_prediction(model_name, vect_text):
 def main():
     """Tweet Classifier App with Streamlit """
 
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.image("logo/tweet.jpeg", width=200)
+    with col2:
+        st.write(' ')
+    with col3:
+        st.image("logo/climate.jpeg", width=200)
+
     # Creates a main title and subheader on your page -
     # these are static across all pages
     st.title("Team GridSearch AI Tweet Classifer")
@@ -70,6 +79,10 @@ def main():
     options = ["About Us", "Team", "Project Description",
                "Information", "Model Predictions"]
     selection = st.sidebar.selectbox("Choose Option", options)
+# [theme]
+# base="light"
+# primaryColor="#f39241"
+# textColor="#173c56"
 
     # Building out the "Information" page
     if selection == "Information":
