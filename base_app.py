@@ -25,10 +25,13 @@
 import streamlit as st
 import joblib
 import os
+import matplotlib.pyplot as plt
 from PIL import Image
 
 # Data dependencies
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
 
 # Vectorizer
 news_vectorizer = open("resources/gridsearch_vectorizer.pkl", "rb")
@@ -37,6 +40,52 @@ tweet_cv = joblib.load(news_vectorizer)
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
+
+
+def model_prediction_raw_data(data):
+    # Load your .pkl file with the model of your choice + make predictions
+    # Try loading in multiple models to give the user a choice
+    # Get Features and Target
+    X_im = data['message']
+    y_im = data['sentiment']
+
+    #vect_text = tweet_cv.transform([tweet_text]).toarray()
+
+    X_train_im, X_test_im, y_train_im, y_test_im = train_test_split(
+        X_im, y_im, test_size=0.1, random_state=17)
+
+    vect_text = tweet_cv.transform(X_test_im)
+
+    lsvc_count = joblib.load(
+        open(os.path.join("resources/gridsearch_final_lsvc.pkl"), "rb"))
+    logreg_count = joblib.load(
+        open(os.path.join("resources/gridsearch_logistic_regression.pkl"), "rb"))
+    ridge_count = joblib.load(
+        open(os.path.join("resources/gridsearch_ridgeclfr.pkl"), "rb"))
+    y_pred_im_lsvc_count = lsvc_count.predict(vect_text)
+    y_pred_im_logreg_count = logreg_count.predict(vect_text)
+    y_pred_im_ridge_count = ridge_count.predict(vect_text)
+
+    lsvc_count_f1 = f1_score(
+        y_test_im, y_pred_im_lsvc_count, average='weighted')
+    logreg_count_f1 = f1_score(
+        y_test_im, y_pred_im_logreg_count, average='weighted')
+    ridge_count_f1 = f1_score(
+        y_test_im, y_pred_im_ridge_count, average='weighted')
+
+    count_f1 = [lsvc_count_f1, logreg_count_f1, ridge_count_f1]
+    model_names = ['LSVC', 'Logistic', 'Ridge']
+    f1_scores = [model_names, count_f1]
+
+    # Convert it to a dataframe
+    df_f1_scores = pd.DataFrame(f1_scores).transpose()
+    df_f1_scores.columns = ['model', 'f1 score']
+    df_f1_scores.set_index('model', inplace=True)
+
+    # Change the columns to numeric
+    df_f1_scores = df_f1_scores.astype({'f1 score': 'float'})
+
+    return df_f1_scores
 
 
 def model_prediction(model_name, vect_text):
@@ -77,7 +126,7 @@ def main():
     # Creating sidebar with selection box -
     # you can create multiple pages this way
     options = ["About Us", "Team", "Project Description",
-               "Information", "Model Predictions"]
+               "Information", "Model Predictions", "Model Comparison"]
     selection = st.sidebar.selectbox("Choose Option", options)
 # [theme]
 # base="light"
@@ -141,6 +190,17 @@ Below is a description of the possible classifications and what each classificat
             st.success(model_prediction(model_name, vect_text))
 
         # if st.button("Classify"):
+    if selection == "Model Comparison":
+        st.info(
+            "This page shows a comparison of the model performance using the raw twitter data frame")
+        barplot_data = model_prediction_raw_data(raw)
+
+        # Plot the results
+        barplot_data = barplot_data.round(2)
+
+        fig, ax = plt.subplots()
+        barplot_data.plot.bar(y='f1 score', ax=ax)
+        st.pyplot(fig)
 
         # Building out the "Project Description" page
     if selection == "Project Description":
